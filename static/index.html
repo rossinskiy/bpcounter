@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0d">
+<title>BP Counter — бонусные баллы GTA5RP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230b0b0d'/><circle cx='16' cy='16' r='9' fill='none' stroke='%23ff7a2f' stroke-width='3'/></svg>">
+</head>
+<body>
+
+<!-- ================= ЭКРАН ВХОДА ================= -->
+<main id="auth" class="auth" hidden>
+  <div class="auth__card">
+    <h1 class="auth__logo">BP<span>counter</span></h1>
+    <p class="auth__sub">Учёт бонусных баллов GTA5RP</p>
+
+    <form id="login-form" class="auth__form" autocomplete="off">
+      <label class="field">
+        <span class="field__label">Код аккаунта</span>
+        <input id="code-input" class="field__input field__input--code" type="text"
+               inputmode="latin" spellcheck="false" autocapitalize="characters"
+               maxlength="19" placeholder="XXXX-XXXX-XXXX-XXXX">
+        <span class="field__hint">16 символов, которые вы получили при регистрации</span>
+      </label>
+      <p id="auth-error" class="auth__error" role="alert" hidden></p>
+      <button class="btn btn--primary" type="submit">Войти</button>
+    </form>
+
+    <div class="auth__divider"><span>или</span></div>
+    <button id="register-btn" class="btn btn--ghost" type="button">Создать новый аккаунт</button>
+  </div>
+</main>
+
+<!-- ================= НОВЫЙ КОД ================= -->
+<main id="welcome" class="auth" hidden>
+  <div class="auth__card">
+    <h1 class="auth__logo">Готово</h1>
+    <p class="auth__sub">Это ваш код. Сохраните его — по нему вы зайдёте с любого устройства.</p>
+    <output id="new-code" class="code-box"></output>
+    <button id="copy-code" class="btn btn--ghost" type="button">Скопировать код</button>
+    <p class="auth__warn">Кода нет в почте и его нельзя восстановить. Запишите его.</p>
+    <button id="welcome-continue" class="btn btn--primary" type="button">Я сохранил, продолжить</button>
+  </div>
+</main>
+
+<!-- ================= ПРИЛОЖЕНИЕ ================= -->
+<div id="app" hidden>
+
+  <header class="topbar">
+    <div class="topbar__inner">
+      <div class="topbar__brand">BP<span>counter</span></div>
+      <div class="topbar__right">
+        <span id="mult-badge" class="badge" hidden></span>
+        <button id="logout" class="iconbtn" type="button" title="Выйти" aria-label="Выйти">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 12H4m0 0 3.5-3.5M4 12l3.5 3.5M11 5h6a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-6"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="hero__label">Заработано сегодня</div>
+    <div class="hero__value"><span id="today-bp">0</span> <span class="hero__unit">BP</span></div>
+    <div class="hero__meta">
+      <span>Сброс через <b id="reset-in">—</b></span>
+      <span class="dot"></span>
+      <span>Всего: <b id="total-bp">0</b> BP</span>
+    </div>
+    <div class="hero__bar"><i id="hero-bar" style="width:0%"></i></div>
+    <div class="hero__hint">
+      <span id="done-count">0</span> из <span id="task-count">0</span> заданий ·
+      потолок дня <b id="max-bp">0</b> BP
+    </div>
+  </section>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab is-active" role="tab" data-tab="tasks" aria-selected="true">Задания</button>
+    <button class="tab" role="tab" data-tab="routine" aria-selected="false">Маршрут</button>
+    <button class="tab" role="tab" data-tab="stats" aria-selected="false">Статистика</button>
+    <button class="tab" role="tab" data-tab="settings" aria-selected="false">Настройки</button>
+  </nav>
+
+  <main class="content">
+
+    <!-- Задания -->
+    <section id="panel-tasks" class="panel is-active" role="tabpanel">
+      <div id="cat-bar" class="catbar" role="tablist" aria-label="Категории заданий"></div>
+      <p id="edit-hint" class="edithint" hidden>
+        Отмечайте задания, которые вам <b>недоступны</b> — они пропадут из списка,
+        а потолок за день пересчитается под вас.
+      </p>
+      <div id="task-list"></div>
+      <div class="panel__actions">
+        <button id="edit-mode" class="btn btn--ghost btn--sm" type="button">Настроить доступность</button>
+        <button id="uncheck-all" class="btn btn--ghost btn--sm" type="button">Снять все отметки</button>
+      </div>
+    </section>
+
+    <!-- Маршрут -->
+    <section id="panel-routine" class="panel" role="tabpanel">
+      <p class="note">Соберите порядок, в котором вам удобно проходить день. На вкладке
+        «Задания» появится категория <b>Маршрут</b> — задания там идут этими шагами,
+        а следующее невыполненное подсвечивается.</p>
+
+      <div id="routine-sum" class="routine-sum"></div>
+      <div id="routine-list" class="routine-list"></div>
+
+      <h2 class="h2">Добавить в маршрут</h2>
+      <div id="routine-add" class="routine-add"></div>
+    </section>
+
+    <!-- Статистика -->
+    <section id="panel-stats" class="panel" role="tabpanel">
+      <div class="statgrid">
+        <div class="stat"><div class="stat__label">Сегодня / потолок</div><div class="stat__value" id="s-today">0</div></div>
+        <div class="stat"><div class="stat__label">Всего за всё время</div><div class="stat__value" id="s-total">0</div></div>
+        <div class="stat"><div class="stat__label">Множитель</div><div class="stat__value" id="s-mult">x1</div></div>
+        <div class="stat"><div class="stat__label">Среднее за день</div><div class="stat__value" id="s-avg">0</div></div>
+      </div>
+      <h2 class="h2">Прошлые дни</h2>
+      <div id="history" class="history"></div>
+    </section>
+
+    <!-- Настройки -->
+    <section id="panel-settings" class="panel" role="tabpanel">
+      <h2 class="h2">Множители</h2>
+      <label class="switch">
+        <input type="checkbox" id="opt-vip">
+        <span class="switch__box" aria-hidden="true"></span>
+        <span class="switch__text">
+          <b>VIP-статус</b>
+          <small>x2 бонусных баллов за каждое задание</small>
+        </span>
+      </label>
+      <label class="switch">
+        <input type="checkbox" id="opt-x2week">
+        <span class="switch__box" aria-hidden="true"></span>
+        <span class="switch__text">
+          <b>x2 на сервере</b>
+          <small>ещё x2 бонусных баллов сверху</small>
+        </span>
+      </label>
+      <p class="note">Текущий множитель: <b id="set-mult">x1</b> — он применяется ко всем заданиям за сегодня.</p>
+
+      <h2 class="h2">Свои задания</h2>
+      <form id="custom-form" class="customform" autocomplete="off">
+        <input id="custom-name" class="field__input" type="text" placeholder="Название задания" maxlength="60">
+        <input id="custom-bp" class="field__input field__input--num" type="number" placeholder="BP" min="1" max="100000">
+        <button class="btn btn--primary btn--sm" type="submit">Добавить</button>
+      </form>
+      <div id="custom-list" class="customlist"></div>
+
+      <h2 class="h2">Аккаунт</h2>
+      <div class="account">
+        <div class="account__label">Код для входа с другого устройства</div>
+        <output id="my-code" class="code-box code-box--sm"></output>
+        <button id="copy-my-code" class="btn btn--ghost btn--sm" type="button">Скопировать</button>
+      </div>
+      <p class="note">Сутки обнуляются в <b>07:00 по Москве</b>: счётчик за сегодня и отметки заданий сбрасываются, задания можно выполнять заново.</p>
+    </section>
+
+  </main>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="/app.js"></script>
+</body>
+</html>
