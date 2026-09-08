@@ -2,6 +2,8 @@
 
 A local, dependency-free web app to track daily bonus-point (BP) tasks on GTA5RP. Runs on Python's standard library only; data is stored as plain JSON files under `data/`.
 
+**Live:** [bp.karatel.win](https://bp.karatel.win/)
+
 ## Usage
 ```bash
 python server.py 8770
